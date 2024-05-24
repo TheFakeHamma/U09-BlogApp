@@ -1,87 +1,94 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Profile() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-  });
+  const [userBlogs, setUserBlogs] = useState([]);
+  const [likedBlogs, setLikedBlogs] = useState([]);
+  const [comments, setComments] = useState([]);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      const token = localStorage.getItem("token");
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          "x-auth-token": token,
-        },
-      };
+    if (!token) {
+      navigate("/login");
+      return;
+    }
 
+    const fetchUserBlogs = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/users/me",
-          config
-        );
-        setFormData({
-          name: res.data.name,
-          email: res.data.email,
+        const res = await axios.get("http://localhost:5000/api/users/blogs", {
+          headers: { "x-auth-token": token },
         });
+        setUserBlogs(res.data);
       } catch (err) {
         console.error(err.response.data);
       }
     };
 
-    fetchProfile();
-  }, []);
-
-  const { name, email } = formData;
-
-  const onChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem("token");
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
+    const fetchLikedBlogs = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/users/liked-blogs",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
+        setLikedBlogs(res.data);
+      } catch (err) {
+        console.error(err.response.data);
+      }
     };
 
-    try {
-      await axios.put("http://localhost:5000/api/users/me", formData, config);
-      alert("Profile updated successfully");
-    } catch (err) {
-      console.error(err.response.data);
-    }
-  };
+    const fetchComments = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/users/comments",
+          {
+            headers: { "x-auth-token": token },
+          }
+        );
+        setComments(res.data);
+      } catch (err) {
+        console.error(err.response.data);
+      }
+    };
+
+    fetchUserBlogs();
+    fetchLikedBlogs();
+    fetchComments();
+  }, [token, navigate]);
 
   return (
-    <form onSubmit={onSubmit}>
-      <div>
-        <label>Name</label>
-        <input
-          type="text"
-          name="name"
-          value={name}
-          onChange={onChange}
-          required
-        />
-      </div>
-      <div>
-        <label>Email</label>
-        <input
-          type="email"
-          name="email"
-          value={email}
-          onChange={onChange}
-          required
-        />
-      </div>
-      <button type="submit">Update Profile</button>
-    </form>
+    <div>
+      <h1 className="text-3xl font-bold">Profile</h1>
+      <h2 className="text-2xl font-bold mt-4">Your Blogs</h2>
+      {userBlogs.map((blog) => (
+        <div key={blog._id}>
+          <h3>{blog.title}</h3>
+          <p>{blog.content}</p>
+          <p>Category: {blog.category}</p>
+          <p>Likes: {blog.likes.length}</p>
+        </div>
+      ))}
+      <h2 className="text-2xl font-bold mt-4">Liked Blogs</h2>
+      {likedBlogs.map((blog) => (
+        <div key={blog._id}>
+          <h3>{blog.title}</h3>
+          <p>{blog.content}</p>
+          <p>Category: {blog.category}</p>
+          <p>Likes: {blog.likes.length}</p>
+        </div>
+      ))}
+      <h2 className="text-2xl font-bold mt-4">Your Comments</h2>
+      {comments.map((comment) => (
+        <div key={comment._id}>
+          <p>{comment.text}</p>
+          <p>Blog: {comment.blogTitle}</p>
+        </div>
+      ))}
+    </div>
   );
 }
 
