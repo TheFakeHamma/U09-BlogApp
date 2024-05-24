@@ -182,4 +182,47 @@ exports.searchBlogs = async (req, res) => {
     }
 };
 
+// Get top 3 liked blogs
+exports.getTopBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find().sort({ likes: -1 }).limit(3).populate('author', 'name');
+        res.json(blogs);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
 
+// Get latest 5 blogs
+exports.getLatestBlogs = async (req, res) => {
+    try {
+        const blogs = await Blog.find().sort({ createdAt: -1 }).limit(5).populate('author', 'name');
+        res.json(blogs);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// Get all blogs with pagination
+exports.getAllBlogsPaginated = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+    try {
+        const blogs = await Blog.find()
+            .sort({ createdAt: -1 })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .populate('author', 'name');
+
+        const count = await Blog.countDocuments();
+
+        res.json({
+            blogs,
+            totalPages: Math.ceil(count / limit),
+            currentPage: page,
+        });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};

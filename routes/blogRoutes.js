@@ -1,10 +1,19 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog, likeBlog, unlikeBlog, addComment, getComments, searchBlogs } = require('../controllers/blogController');
+const { searchBlogs, getBlogs, getBlogById, createBlog, updateBlog, deleteBlog, likeBlog, unlikeBlog, addComment, getComments, getTopBlogs, getLatestBlogs, getAllBlogsPaginated } = require('../controllers/blogController');
 
 // Search blogs
 router.get('/search', searchBlogs);
+
+// Get top 3 liked blogs
+router.get('/top', getTopBlogs);
+
+// Get latest 5 blogs
+router.get('/latest', getLatestBlogs);
+
+// Get all blogs with pagination
+router.get('/paginated', getAllBlogsPaginated);
 
 // Get all blogs
 router.get('/', getBlogs);
