@@ -14,6 +14,13 @@ function BlogList() {
   const [categories, setCategories] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalPagesTitle, setTotalPagesTitle] = useState(1);
+  const [totalPagesContent, setTotalPagesContent] = useState(1);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+  const [totalTitleMatches, setTotalTitleMatches] = useState(0);
+  const [totalContentMatches, setTotalContentMatches] = useState(0);
+  const [searchPageTitle, setSearchPageTitle] = useState(1);
+  const [searchPageContent, setSearchPageContent] = useState(1);
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const userId = token ? jwtDecode(token).user.id : null;
@@ -26,6 +33,7 @@ function BlogList() {
         );
         setBlogs(res.data.blogs);
         setTotalPages(res.data.totalPages);
+        setTotalBlogs(res.data.totalBlogs);
         const uniqueCategories = [
           ...new Set(res.data.blogs.map((blog) => blog.category)),
         ];
@@ -35,18 +43,26 @@ function BlogList() {
       }
     };
 
-    fetchBlogs();
-  }, [page]);
+    if (!submittedQuery) {
+      fetchBlogs();
+    }
+  }, [page, submittedQuery]);
 
   const handleSearch = async (e) => {
     e.preventDefault();
     setSubmittedQuery(searchQuery);
+    setSearchPageTitle(1);
+    setSearchPageContent(1);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/blogs/search?query=${searchQuery}`
+        `http://localhost:5000/api/blogs/search?query=${searchQuery}&page=1`
       );
       setTitleMatches(res.data.titleMatches);
       setContentMatches(res.data.contentMatches);
+      setTotalPagesTitle(res.data.totalPagesTitle);
+      setTotalPagesContent(res.data.totalPagesContent);
+      setTotalTitleMatches(res.data.totalTitleMatches);
+      setTotalContentMatches(res.data.totalContentMatches);
     } catch (err) {
       console.error(err.response.data);
     }
@@ -146,7 +162,12 @@ function BlogList() {
   };
 
   const handlePageChange = (newPage) => {
-    setPage(newPage);
+    if (submittedQuery) {
+      setSearchPageTitle(newPage);
+      setSearchPageContent(newPage);
+    } else {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -201,6 +222,27 @@ function BlogList() {
               )}
             </div>
           ))}
+          {totalPagesTitle > 1 && (
+            <div className="mt-4">
+              {Array.from({ length: totalPagesTitle }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`p-2 ${
+                    index + 1 === searchPageTitle
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+          <p>
+            Showing {titleMatches.length} of {totalTitleMatches} blogs found in
+            title
+          </p>
         </div>
       )}
       {submittedQuery && contentMatches.length > 0 && (
@@ -228,6 +270,27 @@ function BlogList() {
               )}
             </div>
           ))}
+          {totalPagesContent > 1 && (
+            <div className="mt-4">
+              {Array.from({ length: totalPagesContent }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`p-2 ${
+                    index + 1 === searchPageContent
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+          <p>
+            Showing {contentMatches.length} of {totalContentMatches} blogs found
+            in content
+          </p>
         </div>
       )}
       {submittedQuery &&
@@ -235,47 +298,50 @@ function BlogList() {
         contentMatches.length === 0 && (
           <p>No blogs found matching your search criteria.</p>
         )}
-      {(!submittedQuery ||
-        (titleMatches.length === 0 && contentMatches.length === 0)) &&
-        blogs.length > 0 && (
-          <div>
-            {blogs.map((blog) => (
-              <div key={blog._id}>
-                <h3>{blog.title}</h3>
-                <p>{blog.content}</p>
-                <p>Category: {blog.category}</p>
-                <p>Author: {blog.author.name}</p>
-                <p>Likes: {blog.likes.length}</p>
-                {token ? (
-                  <>
-                    {blog.likes.includes(userId) ? (
-                      <button onClick={() => unlikeBlog(blog._id)}>
-                        Unlike
-                      </button>
-                    ) : (
-                      <button onClick={() => likeBlog(blog._id)}>Like</button>
-                    )}
-                  </>
-                ) : (
-                  <p>Login to like this blog</p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      <div className="mt-4">
-        {Array.from({ length: totalPages }, (_, index) => (
-          <button
-            key={index}
-            onClick={() => handlePageChange(index + 1)}
-            className={`p-2 ${
-              index + 1 === page ? "bg-blue-500 text-white" : "bg-gray-200"
-            }`}
-          >
-            {index + 1}
-          </button>
-        ))}
-      </div>
+      {!submittedQuery && blogs.length > 0 && (
+        <div>
+          {blogs.map((blog) => (
+            <div key={blog._id}>
+              <h3>{blog.title}</h3>
+              <p>{blog.content}</p>
+              <p>Category: {blog.category}</p>
+              <p>Author: {blog.author.name}</p>
+              <p>Likes: {blog.likes.length}</p>
+              {token ? (
+                <>
+                  {blog.likes.includes(userId) ? (
+                    <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
+                  ) : (
+                    <button onClick={() => likeBlog(blog._id)}>Like</button>
+                  )}
+                </>
+              ) : (
+                <p>Login to like this blog</p>
+              )}
+            </div>
+          ))}
+          {totalPages > 1 && (
+            <div className="mt-4">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => handlePageChange(index + 1)}
+                  className={`p-2 ${
+                    index + 1 === page
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
+          <p>
+            Showing {blogs.length} of {totalBlogs} blogs
+          </p>
+        </div>
+      )}
     </div>
   );
 }

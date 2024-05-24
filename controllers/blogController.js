@@ -163,19 +163,36 @@ exports.getComments = async (req, res) => {
     }
 };
 
-// Search blogs by title or content
+// Search blogs by title or content with pagination
 exports.searchBlogs = async (req, res) => {
-    const { query } = req.query;
+    const { query, page = 1, limit = 10 } = req.query;
     try {
         const titleMatches = await Blog.find({
             title: { $regex: query, $options: 'i' }
-        }).populate('author', 'name');
+        })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .populate('author', 'name');
 
         const contentMatches = await Blog.find({
             content: { $regex: query, $options: 'i' }
-        }).populate('author', 'name');
+        })
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .populate('author', 'name');
 
-        res.json({ titleMatches, contentMatches });
+        const titleCount = await Blog.countDocuments({ title: { $regex: query, $options: 'i' } });
+        const contentCount = await Blog.countDocuments({ content: { $regex: query, $options: 'i' } });
+
+        res.json({
+            titleMatches,
+            contentMatches,
+            totalPagesTitle: Math.ceil(titleCount / limit),
+            totalPagesContent: Math.ceil(contentCount / limit),
+            totalTitleMatches: titleCount,
+            totalContentMatches: contentCount,
+            currentPage: page,
+        });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -220,6 +237,7 @@ exports.getAllBlogsPaginated = async (req, res) => {
             blogs,
             totalPages: Math.ceil(count / limit),
             currentPage: page,
+            totalBlogs: count
         });
     } catch (err) {
         console.error(err.message);
