@@ -86,3 +86,46 @@ exports.deleteBlog = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+// Like a blog
+exports.likeBlog = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        // Check if the blog has already been liked by this user
+        if (blog.likes.includes(req.user.id)) {
+            return res.status(400).json({ msg: 'Blog already liked' });
+        }
+
+        blog.likes.push(req.user.id);
+        await blog.save();
+
+        res.json(blog.likes);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// Unlike a blog
+exports.unlikeBlog = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        // Check if the blog has not yet been liked by this user
+        if (!blog.likes.includes(req.user.id)) {
+            return res.status(400).json({ msg: 'Blog has not yet been liked' });
+        }
+
+        blog.likes = blog.likes.filter((like) => like.toString() !== req.user.id);
+        await blog.save();
+
+        res.json(blog.likes);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+

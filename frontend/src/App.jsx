@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import CreateBlog from "./pages/CreateBlog";
 import BlogList from "./pages/BlogList";
+import Profile from "./pages/Profile"; // Import Profile component
 import PrivateRoute from "./components/PrivateRoute";
 
 function App() {
@@ -22,6 +23,14 @@ function App() {
             element={
               <PrivateRoute>
                 <CreateBlog />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <PrivateRoute>
+                <Profile />
               </PrivateRoute>
             }
           />
