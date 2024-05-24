@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -8,6 +9,7 @@ function Login() {
     password: "",
   });
 
+  const navigate = useNavigate();
   const { email, password } = formData;
 
   const onChange = (e) =>
@@ -20,7 +22,8 @@ function Login() {
         "http://localhost:5000/api/users/login",
         formData
       );
-      console.log(res.data);
+      localStorage.setItem("token", res.data.token);
+      navigate("/"); // Redirect to home page after login
     } catch (err) {
       console.error(err.response.data);
     }
