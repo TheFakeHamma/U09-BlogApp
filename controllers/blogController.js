@@ -162,3 +162,24 @@ exports.getComments = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+// Search blogs by title or content
+exports.searchBlogs = async (req, res) => {
+    const { query } = req.query;
+    try {
+        const titleMatches = await Blog.find({
+            title: { $regex: query, $options: 'i' }
+        }).populate('author', 'name');
+
+        const contentMatches = await Blog.find({
+            content: { $regex: query, $options: 'i' }
+        }).populate('author', 'name');
+
+        res.json({ titleMatches, contentMatches });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+

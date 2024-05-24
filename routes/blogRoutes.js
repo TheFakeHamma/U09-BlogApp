@@ -1,22 +1,24 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog, likeBlog, unlikeBlog, addComment, getComments } = require('../controllers/blogController');
+const { createBlog, getBlogs, getBlogById, updateBlog, deleteBlog, likeBlog, unlikeBlog, addComment, getComments, searchBlogs } = require('../controllers/blogController');
 
+// Search blogs
+router.get('/search', searchBlogs);
 
-// Route to create a blog
-router.post('/', auth, createBlog);
-
-// Route to get all blogs
+// Get all blogs
 router.get('/', getBlogs);
 
-// Route to get a single blog by ID
+// Create a new blog
+router.post('/', auth, createBlog);
+
+// Get a single blog by ID
 router.get('/:id', getBlogById);
 
-// Route to update a blog
+// Update a blog
 router.put('/:id', auth, updateBlog);
 
-// Route to delete a blog
+// Delete a blog
 router.delete('/:id', auth, deleteBlog);
 
 // Like a blog
