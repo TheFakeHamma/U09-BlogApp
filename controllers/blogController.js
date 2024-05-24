@@ -129,3 +129,36 @@ exports.unlikeBlog = async (req, res) => {
     }
 };
 
+// Add a comment to a blog
+exports.addComment = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        const newComment = {
+            user: req.user.id,
+            text: req.body.text,
+        };
+
+        blog.comments.unshift(newComment);
+        await blog.save();
+
+        res.json(blog.comments);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// Get comments for a blog
+exports.getComments = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id).populate('comments.user', 'name');
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        res.json(blog.comments);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};

@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  const userId = token ? jwtDecode(token).user.id : null;
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -21,7 +24,6 @@ function BlogList() {
   }, []);
 
   const likeBlog = async (id) => {
-    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login"); // Redirect to login if not logged in
       return;
@@ -38,7 +40,7 @@ function BlogList() {
       await axios.put(`http://localhost:5000/api/blogs/like/${id}`, {}, config);
       setBlogs(
         blogs.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, token] } : blog
+          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
         )
       );
     } catch (err) {
@@ -47,7 +49,6 @@ function BlogList() {
   };
 
   const unlikeBlog = async (id) => {
-    const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login"); // Redirect to login if not logged in
       return;
@@ -69,7 +70,7 @@ function BlogList() {
       setBlogs(
         blogs.map((blog) =>
           blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== token) }
+            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
             : blog
         )
       );
@@ -88,10 +89,13 @@ function BlogList() {
           <p>Category: {blog.category}</p>
           <p>Author: {blog.author.name}</p>
           <p>Likes: {blog.likes.length}</p>
-          {localStorage.getItem("token") ? (
+          {token ? (
             <>
-              <button onClick={() => likeBlog(blog._id)}>Like</button>
-              <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
+              {blog.likes.includes(userId) ? (
+                <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
+              ) : (
+                <button onClick={() => likeBlog(blog._id)}>Like</button>
+              )}
             </>
           ) : (
             <p>Login to like this blog</p>
