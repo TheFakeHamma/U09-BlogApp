@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
-const { searchBlogs, getBlogs, getBlogById, createBlog, updateBlog, deleteBlog, likeBlog, unlikeBlog, addComment, getComments, getTopBlogs, getLatestBlogs, getAllBlogsPaginated } = require('../controllers/blogController');
+const { searchBlogs, getBlogs, getBlogById, createBlog, updateBlog, deleteBlog, likeBlog, unlikeBlog, getComments, getTopBlogs, getLatestBlogs, getAllBlogsPaginated } = require('../controllers/blogController');
+const blogController = require('../controllers/blogController');
 
 // Search blogs
 router.get('/search', searchBlogs);
@@ -37,7 +38,13 @@ router.put('/like/:id', auth, likeBlog);
 router.put('/unlike/:id', auth, unlikeBlog);
 
 // Add a comment to a blog
-router.post('/comment/:id', auth, addComment);
+router.post('/comment/:id', auth, blogController.addComment);
+
+// Edit a comment on a blog
+router.put('/comment/:id/:comment_id', auth, blogController.editComment);
+
+// Delete a comment on a blog
+router.delete('/comment/:id/:comment_id', auth, blogController.deleteComment);
 
 // Get comments for a blog
 router.get('/comment/:id', getComments);

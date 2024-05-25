@@ -170,6 +170,17 @@ function BlogList() {
     }
   };
 
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold">Blogs</h1>
@@ -209,6 +220,7 @@ function BlogList() {
               <p>Category: {blog.category}</p>
               <p>Author: {blog.author.name}</p>
               <p>Likes: {blog.likes.length}</p>
+              <p>Posted on: {formatDate(blog.createdAt)}</p>
               {token ? (
                 <>
                   {blog.likes.includes(userId) ? (
@@ -257,6 +269,7 @@ function BlogList() {
               <p>Category: {blog.category}</p>
               <p>Author: {blog.author.name}</p>
               <p>Likes: {blog.likes.length}</p>
+              <p>Posted on: {formatDate(blog.createdAt)}</p>
               {token ? (
                 <>
                   {blog.likes.includes(userId) ? (
@@ -307,6 +320,7 @@ function BlogList() {
               <p>Category: {blog.category}</p>
               <p>Author: {blog.author.name}</p>
               <p>Likes: {blog.likes.length}</p>
+              <p>Posted on: {formatDate(blog.createdAt)}</p>
               {token ? (
                 <>
                   {blog.likes.includes(userId) ? (

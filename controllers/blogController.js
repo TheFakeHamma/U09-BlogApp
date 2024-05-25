@@ -33,7 +33,9 @@ exports.getBlogs = async (req, res) => {
 // Get a single blog by ID
 exports.getBlogById = async (req, res) => {
     try {
-        const blog = await Blog.findById(req.params.id).populate('author', 'name');
+        const blog = await Blog.findById(req.params.id)
+            .populate('author', 'name')
+            .populate('comments.user', 'name');
         if (!blog) return res.status(404).json({ msg: 'Blog not found' });
         res.json(blog);
     } catch (err) {
@@ -41,6 +43,7 @@ exports.getBlogById = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
 
 // Update a blog
 exports.updateBlog = async (req, res) => {
@@ -138,11 +141,57 @@ exports.addComment = async (req, res) => {
         const newComment = {
             user: req.user.id,
             text: req.body.text,
+            date: Date.now()
         };
 
         blog.comments.unshift(newComment);
         await blog.save();
+        res.json(blog.comments);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
 
+// Edit a comment on a blog
+exports.editComment = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        const comment = blog.comments.find(comment => comment.id === req.params.comment_id);
+        if (!comment) return res.status(404).json({ msg: 'Comment not found' });
+
+        // Check user
+        if (comment.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'User not authorized' });
+        }
+
+        comment.text = req.body.text;
+        await blog.save();
+        res.json(blog.comments);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+};
+
+// Delete a comment on a blog
+exports.deleteComment = async (req, res) => {
+    try {
+        const blog = await Blog.findById(req.params.id);
+        if (!blog) return res.status(404).json({ msg: 'Blog not found' });
+
+        const comment = blog.comments.find(comment => comment.id === req.params.comment_id);
+        if (!comment) return res.status(404).json({ msg: 'Comment not found' });
+
+        // Check user
+        if (comment.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'User not authorized' });
+        }
+
+        blog.comments = blog.comments.filter(({ id }) => id !== req.params.comment_id);
+        await blog.save();
         res.json(blog.comments);
     } catch (err) {
         console.error(err.message);

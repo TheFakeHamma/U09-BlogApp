@@ -30,6 +30,17 @@ function HomePage() {
     fetchLatestBlogs();
   }, []);
 
+  const formatDate = (dateString) => {
+    const options = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+  };
+
   return (
     <div>
       <h1 className="text-3xl font-bold">Home Page</h1>
@@ -42,6 +53,7 @@ function HomePage() {
             <p>Category: {blog.category}</p>
             <p>Author: {blog.author.name}</p>
             <p>Likes: {blog.likes.length}</p>
+            <p>Posted on: {formatDate(blog.createdAt)}</p>
           </div>
         ))}
       </section>
@@ -54,6 +66,7 @@ function HomePage() {
             <p>Category: {blog.category}</p>
             <p>Author: {blog.author.name}</p>
             <p>Likes: {blog.likes.length}</p>
+            <p>Posted on: {formatDate(blog.createdAt)}</p>
           </div>
         ))}
         <Link to="/blogs">
