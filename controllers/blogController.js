@@ -104,7 +104,8 @@ exports.likeBlog = async (req, res) => {
         blog.likes.push(req.user.id);
         await blog.save();
 
-        res.json(blog.likes);
+        const updatedBlog = await Blog.findById(req.params.id).populate('author', 'name');
+        res.json(updatedBlog);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -125,7 +126,8 @@ exports.unlikeBlog = async (req, res) => {
         blog.likes = blog.likes.filter((like) => like.toString() !== req.user.id);
         await blog.save();
 
-        res.json(blog.likes);
+        const updatedBlog = await Blog.findById(req.params.id).populate('author', 'name');
+        res.json(updatedBlog);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server error');
@@ -248,16 +250,16 @@ exports.searchBlogs = async (req, res) => {
     }
 };
 
-// Get top 3 liked blogs
-exports.getTopBlogs = async (req, res) => {
-    try {
-        const blogs = await Blog.find().sort({ likes: -1 }).limit(3).populate('author', 'name');
-        res.json(blogs);
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
-    }
-};
+// // Get top 3 liked blogs
+// exports.getTopBlogs = async (req, res) => {
+//     try {
+//         const blogs = await Blog.find().sort({ likes: -1 }).limit(3).populate('author', 'name');
+//         res.json(blogs);
+//     } catch (err) {
+//         console.error(err.message);
+//         res.status(500).send('Server error');
+//     }
+// };
 
 // Get latest 5 blogs
 exports.getLatestBlogs = async (req, res) => {

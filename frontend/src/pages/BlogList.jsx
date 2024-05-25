@@ -1,8 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import BlogCard from "../components/BlogCard";
+import Section from "../components/Section";
+import { likeBlog, unlikeBlog } from "../utils/blogActions";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
@@ -21,7 +23,6 @@ function BlogList() {
   const [totalContentMatches, setTotalContentMatches] = useState(0);
   const [searchPageTitle, setSearchPageTitle] = useState(1);
   const [searchPageContent, setSearchPageContent] = useState(1);
-  const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const userId = token ? jwtDecode(token).user.id : null;
 
@@ -81,84 +82,12 @@ function BlogList() {
     }
   };
 
-  const likeBlog = async (id) => {
-    if (!token) {
-      navigate("/login"); // Redirect to login if not logged in
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(`http://localhost:5000/api/blogs/like/${id}`, {}, config);
-      setTitleMatches(
-        titleMatches.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
-        )
-      );
-      setContentMatches(
-        contentMatches.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
-        )
-      );
-      setBlogs(
-        blogs.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
-        )
-      );
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleLikeBlog = async (id) => {
+    await likeBlog(id, token, userId, setBlogs);
   };
 
-  const unlikeBlog = async (id) => {
-    if (!token) {
-      navigate("/login"); // Redirect to login if not logged in
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(
-        `http://localhost:5000/api/blogs/unlike/${id}`,
-        {},
-        config
-      );
-      setTitleMatches(
-        titleMatches.map((blog) =>
-          blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
-            : blog
-        )
-      );
-      setContentMatches(
-        contentMatches.map((blog) =>
-          blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
-            : blog
-        )
-      );
-      setBlogs(
-        blogs.map((blog) =>
-          blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
-            : blog
-        )
-      );
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleUnlikeBlog = async (id) => {
+    await unlikeBlog(id, token, userId, setBlogs);
   };
 
   const handlePageChange = (newPage) => {
@@ -182,9 +111,9 @@ function BlogList() {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold">Blogs</h1>
-      <form onSubmit={handleSearch}>
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold mb-4">Blogs</h1>
+      <form onSubmit={handleSearch} className="mb-4">
         <input
           type="text"
           value={searchQuery}
@@ -199,7 +128,7 @@ function BlogList() {
       <select
         value={category}
         onChange={handleCategoryChange}
-        className="border p-2 mt-4"
+        className="border p-2 mb-4"
       >
         <option value="">All Categories</option>
         {categories.map((cat) => (
@@ -209,30 +138,16 @@ function BlogList() {
         ))}
       </select>
       {submittedQuery && titleMatches.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold">
-            Blogs with &quot;{submittedQuery}&quot; in title
-          </h2>
+        <Section title={`Blogs with "${submittedQuery}" in title`}>
           {titleMatches.map((blog) => (
-            <div key={blog._id}>
-              <h3>{blog.title}</h3>
-              <p>{blog.content}</p>
-              <p>Category: {blog.category}</p>
-              <p>Author: {blog.author.name}</p>
-              <p>Likes: {blog.likes.length}</p>
-              <p>Posted on: {formatDate(blog.createdAt)}</p>
-              {token ? (
-                <>
-                  {blog.likes.includes(userId) ? (
-                    <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
-                  ) : (
-                    <button onClick={() => likeBlog(blog._id)}>Like</button>
-                  )}
-                </>
-              ) : (
-                <p>Login to like this blog</p>
-              )}
-            </div>
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              formatDate={formatDate}
+              userId={userId}
+              likeBlog={handleLikeBlog}
+              unlikeBlog={handleUnlikeBlog}
+            />
           ))}
           {totalPagesTitle > 1 && (
             <div className="mt-4">
@@ -255,33 +170,19 @@ function BlogList() {
             Showing {titleMatches.length} of {totalTitleMatches} blogs found in
             title
           </p>
-        </div>
+        </Section>
       )}
       {submittedQuery && contentMatches.length > 0 && (
-        <div>
-          <h2 className="text-2xl font-bold">
-            Blogs with &quot;{submittedQuery}&quot; in content
-          </h2>
+        <Section title={`Blogs with "${submittedQuery}" in content`}>
           {contentMatches.map((blog) => (
-            <div key={blog._id}>
-              <h3>{blog.title}</h3>
-              <p>{blog.content}</p>
-              <p>Category: {blog.category}</p>
-              <p>Author: {blog.author.name}</p>
-              <p>Likes: {blog.likes.length}</p>
-              <p>Posted on: {formatDate(blog.createdAt)}</p>
-              {token ? (
-                <>
-                  {blog.likes.includes(userId) ? (
-                    <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
-                  ) : (
-                    <button onClick={() => likeBlog(blog._id)}>Like</button>
-                  )}
-                </>
-              ) : (
-                <p>Login to like this blog</p>
-              )}
-            </div>
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              formatDate={formatDate}
+              userId={userId}
+              likeBlog={handleLikeBlog}
+              unlikeBlog={handleUnlikeBlog}
+            />
           ))}
           {totalPagesContent > 1 && (
             <div className="mt-4">
@@ -304,7 +205,7 @@ function BlogList() {
             Showing {contentMatches.length} of {totalContentMatches} blogs found
             in content
           </p>
-        </div>
+        </Section>
       )}
       {submittedQuery &&
         titleMatches.length === 0 &&
@@ -312,27 +213,16 @@ function BlogList() {
           <p>No blogs found matching your search criteria.</p>
         )}
       {!submittedQuery && blogs.length > 0 && (
-        <div>
+        <Section title="All Blogs">
           {blogs.map((blog) => (
-            <div key={blog._id}>
-              <h3>{blog.title}</h3>
-              <p>{blog.content}</p>
-              <p>Category: {blog.category}</p>
-              <p>Author: {blog.author.name}</p>
-              <p>Likes: {blog.likes.length}</p>
-              <p>Posted on: {formatDate(blog.createdAt)}</p>
-              {token ? (
-                <>
-                  {blog.likes.includes(userId) ? (
-                    <button onClick={() => unlikeBlog(blog._id)}>Unlike</button>
-                  ) : (
-                    <button onClick={() => likeBlog(blog._id)}>Like</button>
-                  )}
-                </>
-              ) : (
-                <p>Login to like this blog</p>
-              )}
-            </div>
+            <BlogCard
+              key={blog._id}
+              blog={blog}
+              formatDate={formatDate}
+              userId={userId}
+              likeBlog={handleLikeBlog}
+              unlikeBlog={handleUnlikeBlog}
+            />
           ))}
           {totalPages > 1 && (
             <div className="mt-4">
@@ -354,7 +244,7 @@ function BlogList() {
           <p>
             Showing {blogs.length} of {totalBlogs} blogs
           </p>
-        </div>
+        </Section>
       )}
     </div>
   );

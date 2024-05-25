@@ -2,33 +2,36 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import BlogSection from "../components/BlogSection";
+import { likeBlog, unlikeBlog } from "../utils/blogActions";
+import { jwtDecode } from "jwt-decode";
 
 function HomePage() {
-  const [topBlogs, setTopBlogs] = useState([]);
   const [latestBlogs, setLatestBlogs] = useState([]);
+  const token = localStorage.getItem("token");
+  const userId = token ? jwtDecode(token).user.id : null;
 
   useEffect(() => {
-    const fetchTopBlogs = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/blogs/top");
-        setTopBlogs(res.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
-    };
-
-    const fetchLatestBlogs = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/blogs/latest");
-        setLatestBlogs(res.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
-    };
-
-    fetchTopBlogs();
     fetchLatestBlogs();
   }, []);
+
+  const fetchLatestBlogs = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/blogs/latest");
+      setLatestBlogs(res.data);
+    } catch (err) {
+      console.error(err.response.data);
+    }
+  };
+
+  const handleLikeBlog = async (id) => {
+    await likeBlog(id, token, userId, setLatestBlogs);
+    await fetchLatestBlogs();
+  };
+
+  const handleUnlikeBlog = async (id) => {
+    await unlikeBlog(id, token, userId, setLatestBlogs);
+    await fetchLatestBlogs();
+  };
 
   const formatDate = (dateString) => {
     const options = {
@@ -44,11 +47,13 @@ function HomePage() {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-3xl font-bold mb-4">Home Page</h1>
-      <BlogSection title="Top Blogs" blogs={topBlogs} formatDate={formatDate} />
       <BlogSection
         title="Latest Blogs"
         blogs={latestBlogs}
         formatDate={formatDate}
+        userId={userId}
+        likeBlog={handleLikeBlog}
+        unlikeBlog={handleUnlikeBlog}
         showButton={true}
         buttonLink="/blogs"
       />
