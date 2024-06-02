@@ -3,12 +3,14 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import BlogContent from "../components/BlogContent";
+import CommentsSection from "../components/CommentsSection";
+import { likeBlog, unlikeBlog } from "../utils/blogActions";
 
 function BlogDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [blog, setBlog] = useState(null);
-  const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
   const [editCommentId, setEditCommentId] = useState(null);
   const [editCommentText, setEditCommentText] = useState("");
@@ -20,7 +22,6 @@ function BlogDetail() {
       try {
         const res = await axios.get(`http://localhost:5000/api/blogs/${id}`);
         setBlog(res.data);
-        setComments(res.data.comments);
       } catch (err) {
         console.error(err.response.data);
       }
@@ -29,56 +30,12 @@ function BlogDetail() {
     fetchBlog();
   }, [id]);
 
-  const likeBlog = async () => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(`http://localhost:5000/api/blogs/like/${id}`, {}, config);
-      setBlog((prevBlog) => ({
-        ...prevBlog,
-        likes: [...prevBlog.likes, userId],
-      }));
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleLikeBlog = async () => {
+    await likeBlog(id, token, userId, setBlog);
   };
 
-  const unlikeBlog = async () => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(
-        `http://localhost:5000/api/blogs/unlike/${id}`,
-        {},
-        config
-      );
-      setBlog((prevBlog) => ({
-        ...prevBlog,
-        likes: prevBlog.likes.filter((like) => like !== userId),
-      }));
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleUnlikeBlog = async () => {
+    await unlikeBlog(id, token, userId, setBlog);
   };
 
   const addComment = async (e) => {
@@ -177,82 +134,28 @@ function BlogDetail() {
   }
 
   return (
-    <div>
-      <h1>{blog.title}</h1>
-      <p>{blog.content}</p>
-      <p>Category: {blog.category}</p>
-      <p>Author: {blog.author.name}</p>
-      <p>Likes: {blog.likes.length}</p>
-      <p>Posted on: {formatDate(blog.createdAt)}</p>
-      {token ? (
-        <>
-          {blog.likes.includes(userId) ? (
-            <button onClick={unlikeBlog}>Unlike</button>
-          ) : (
-            <button onClick={likeBlog}>Like</button>
-          )}
-        </>
-      ) : (
-        <p>Login to like this blog</p>
-      )}
-      <h2>Comments</h2>
-      <ul>
-        {comments.map((comment) => (
-          <li key={comment._id}>
-            <p>{comment.text}</p>
-            <p>
-              By:{" "}
-              {comment.user && typeof comment.user === "object"
-                ? comment.user.name
-                : comment.user}
-            </p>
-            <p>Commented on: {formatDate(comment.date)}</p>
-            {token &&
-              (comment.user._id
-                ? comment.user._id === userId
-                : comment.user === userId) && (
-                <>
-                  <button
-                    onClick={() => {
-                      setEditCommentId(comment._id);
-                      setEditCommentText(comment.text);
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button onClick={() => deleteComment(comment._id)}>
-                    Delete
-                  </button>
-                </>
-              )}
-            {editCommentId === comment._id && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  editComment(comment._id);
-                }}
-              >
-                <textarea
-                  value={editCommentText}
-                  onChange={(e) => setEditCommentText(e.target.value)}
-                />
-                <button type="submit">Save</button>
-              </form>
-            )}
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={addComment}>
-        <div>
-          <label>Add a Comment</label>
-          <textarea
-            value={commentText}
-            onChange={(e) => setCommentText(e.target.value)}
-            required
-          />
-        </div>
-        <button type="submit">Submit</button>
-      </form>
+    <div className="container mx-auto p-4">
+      <BlogContent
+        blog={blog}
+        formatDate={formatDate}
+        userId={userId}
+        likeBlog={handleLikeBlog}
+        unlikeBlog={handleUnlikeBlog}
+      />
+      <CommentsSection
+        comments={blog.comments}
+        userId={userId}
+        commentText={commentText}
+        setCommentText={setCommentText}
+        editCommentId={editCommentId}
+        setEditCommentId={setEditCommentId}
+        editCommentText={editCommentText}
+        setEditCommentText={setEditCommentText}
+        addComment={addComment}
+        editComment={editComment}
+        deleteComment={deleteComment}
+        formatDate={formatDate}
+      />
     </div>
   );
 }
