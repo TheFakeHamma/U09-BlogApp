@@ -4,11 +4,15 @@ const Blog = require('../models/blogModel');
 exports.createBlog = async (req, res) => {
     const { title, content, category } = req.body;
     try {
+        if (!category) {
+            return res.status(400).json({ msg: 'Category is required' });
+        }
+
         const newBlog = new Blog({
             title,
             content,
             category,
-            author: req.user.id, // assuming req.user.id contains the authenticated user's ID
+            author: req.user.id,
         });
 
         const blog = await newBlog.save();
@@ -295,3 +299,16 @@ exports.getAllBlogsPaginated = async (req, res) => {
         res.status(500).send('Server error');
     }
 };
+
+// Get all categories
+exports.getCategories = async (req, res) => {
+    try {
+        const categories = await Blog.distinct("category");
+        res.json(categories);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send("Server error");
+    }
+};
+
+
