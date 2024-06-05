@@ -1,11 +1,16 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import BlogContent from "../components/BlogContent";
 import CommentsSection from "../components/CommentsSection";
 import { likeBlog, unlikeBlog } from "../utils/blogActions";
+import {
+  getBlog,
+  addComment,
+  editComment,
+  deleteComment,
+} from "../utils/blogApi";
 
 function BlogDetail() {
   const { id } = useParams();
@@ -20,10 +25,10 @@ function BlogDetail() {
   useEffect(() => {
     const fetchBlog = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/blogs/${id}`);
-        setBlog(res.data);
+        const data = await getBlog(id);
+        setBlog(data);
       } catch (err) {
-        console.error(err.response.data);
+        console.error(err);
       }
     };
 
@@ -38,83 +43,51 @@ function BlogDetail() {
     await unlikeBlog(id, token, userId, setBlog);
   };
 
-  const addComment = async (e) => {
+  const handleAddComment = async (e) => {
     e.preventDefault();
     if (!token) {
       alert("You need to be logged in to comment");
       return;
     }
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
     try {
-      await axios.post(
-        `http://localhost:5000/api/blogs/comment/${id}`,
-        { text: commentText },
-        config
-      );
+      await addComment(id, commentText, token);
       setCommentText("");
       window.location.reload(); // Refresh the page after adding a comment. Update this to use state instead later...
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 
-  const editComment = async (commentId) => {
+  const handleEditComment = async (commentId) => {
     if (!token) {
       alert("You need to be logged in to edit comments");
       navigate("/login");
       return;
     }
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
     try {
-      await axios.put(
-        `http://localhost:5000/api/blogs/comment/${id}/${commentId}`,
-        { text: editCommentText },
-        config
-      );
+      await editComment(id, commentId, editCommentText, token);
       setEditCommentId(null);
       setEditCommentText("");
       window.location.reload(); // Refresh the page after editing a comment. Update this to use state instead later...
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 
-  const deleteComment = async (commentId) => {
+  const handleDeleteComment = async (commentId) => {
     if (!token) {
       alert("You need to be logged in to delete comments");
       navigate("/login");
       return;
     }
 
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
     try {
-      await axios.delete(
-        `http://localhost:5000/api/blogs/comment/${id}/${commentId}`,
-        config
-      );
+      await deleteComment(id, commentId, token);
       window.location.reload(); // Refresh the page after deleting a comment. Update this to use state instead later...
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 
@@ -151,9 +124,9 @@ function BlogDetail() {
         setEditCommentId={setEditCommentId}
         editCommentText={editCommentText}
         setEditCommentText={setEditCommentText}
-        addComment={addComment}
-        editComment={editComment}
-        deleteComment={deleteComment}
+        addComment={handleAddComment}
+        editComment={handleEditComment}
+        deleteComment={handleDeleteComment}
         formatDate={formatDate}
       />
     </div>
