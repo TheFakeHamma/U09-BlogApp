@@ -1,10 +1,14 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import BlogCard from "../components/BlogCard";
 import Section from "../components/Section";
 import { likeBlog, unlikeBlog } from "../utils/blogActions";
+import {
+  fetchBlogs,
+  searchBlogs,
+  fetchBlogsByCategory,
+} from "../utils/blogApi";
 
 function BlogList() {
   const [blogs, setBlogs] = useState([]);
@@ -27,25 +31,23 @@ function BlogList() {
   const userId = token ? jwtDecode(token).user.id : null;
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchInitialBlogs = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/blogs/paginated?page=${page}`
-        );
-        setBlogs(res.data.blogs);
-        setTotalPages(res.data.totalPages);
-        setTotalBlogs(res.data.totalBlogs);
+        const data = await fetchBlogs(page);
+        setBlogs(data.blogs);
+        setTotalPages(data.totalPages);
+        setTotalBlogs(data.totalBlogs);
         const uniqueCategories = [
-          ...new Set(res.data.blogs.map((blog) => blog.category)),
+          ...new Set(data.blogs.map((blog) => blog.category)),
         ];
         setCategories(uniqueCategories);
       } catch (err) {
-        console.error(err.response.data);
+        console.error(err);
       }
     };
 
     if (!submittedQuery) {
-      fetchBlogs();
+      fetchInitialBlogs();
     }
   }, [page, submittedQuery]);
 
@@ -55,17 +57,15 @@ function BlogList() {
     setSearchPageTitle(1);
     setSearchPageContent(1);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/blogs/search?query=${searchQuery}&page=1`
-      );
-      setTitleMatches(res.data.titleMatches);
-      setContentMatches(res.data.contentMatches);
-      setTotalPagesTitle(res.data.totalPagesTitle);
-      setTotalPagesContent(res.data.totalPagesContent);
-      setTotalTitleMatches(res.data.totalTitleMatches);
-      setTotalContentMatches(res.data.totalContentMatches);
+      const data = await searchBlogs(searchQuery, 1);
+      setTitleMatches(data.titleMatches);
+      setContentMatches(data.contentMatches);
+      setTotalPagesTitle(data.totalPagesTitle);
+      setTotalPagesContent(data.totalPagesContent);
+      setTotalTitleMatches(data.totalTitleMatches);
+      setTotalContentMatches(data.totalContentMatches);
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 
@@ -73,12 +73,10 @@ function BlogList() {
     const selectedCategory = e.target.value;
     setCategory(selectedCategory);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/blogs?category=${selectedCategory}`
-      );
-      setTitleMatches(res.data);
+      const data = await fetchBlogsByCategory(selectedCategory);
+      setTitleMatches(data);
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 

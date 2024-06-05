@@ -69,3 +69,30 @@ export const deleteComment = async (id, commentId, token) => {
         throw error.response.data;
     }
 };
+
+export const fetchBlogs = async (page) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/blogs/paginated?page=${page}`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const searchBlogs = async (query, page) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/blogs/search?query=${query}&page=${page}`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const fetchBlogsByCategory = async (category) => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/blogs?category=${category}`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
