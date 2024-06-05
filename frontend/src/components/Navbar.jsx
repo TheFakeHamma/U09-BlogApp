@@ -1,10 +1,11 @@
 // eslint-disable-next-line no-unused-vars
-import React from "react";
+import React, { useContext } from "react";
 import NavLink from "./NavLink";
 import Button from "./Button";
+import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const token = localStorage.getItem("token");
+  const { isAuthenticated, logout } = useContext(AuthContext);
 
   return (
     <nav className="bg-gray-800 p-4">
@@ -15,16 +16,10 @@ const Navbar = () => {
         <div>
           <NavLink to="/blogs">Blogs</NavLink>
           <NavLink to="/create-blog">Create Blog</NavLink>
-          {token ? (
+          {isAuthenticated ? (
             <>
               <NavLink to="/profile">Profile</NavLink>
-              <Button
-                onClick={() => {
-                  localStorage.removeItem("token");
-                  window.location.href = "/";
-                }}
-                className="mx-2"
-              >
+              <Button onClick={logout} className="mx-2">
                 Logout
               </Button>
             </>

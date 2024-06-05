@@ -1,9 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { AuthContext } from "../context/AuthContext";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -11,6 +14,7 @@ function Login() {
     password: "",
   });
 
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const { email, password } = formData;
 
@@ -24,10 +28,10 @@ function Login() {
         "http://localhost:5000/api/users/login",
         formData
       );
-      localStorage.setItem("token", res.data.token);
+      login(res.data.token);
       navigate("/");
     } catch (err) {
-      console.error(err.response.data);
+      toast.error(err.response.data.msg || "An error occurred.");
     }
   };
 
@@ -58,7 +62,7 @@ function Login() {
           <div className="flex items-center justify-between">
             <Button type="submit">Login</Button>
             <a
-              href="#" //fix forgot password function later
+              href="/forgot-password"
               className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
             >
               Forgot Password?
@@ -66,6 +70,7 @@ function Login() {
           </div>
         </form>
       </div>
+      <ToastContainer />
     </div>
   );
 }
