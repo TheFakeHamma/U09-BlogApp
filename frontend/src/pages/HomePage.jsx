@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import BlogSection from "../components/BlogSection";
 import { likeBlog, unlikeBlog } from "../utils/blogActions";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
+import { fetchLatestBlogs } from "../utils/blogApi";
 
 function HomePage() {
   const [latestBlogs, setLatestBlogs] = useState([]);
@@ -11,17 +11,17 @@ function HomePage() {
   const userId = token ? jwtDecode(token).user.id : null;
 
   useEffect(() => {
-    fetchLatestBlogs();
-  }, []);
+    const loadLatestBlogs = async () => {
+      try {
+        const data = await fetchLatestBlogs();
+        setLatestBlogs(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  const fetchLatestBlogs = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/blogs/latest");
-      setLatestBlogs(res.data);
-    } catch (err) {
-      console.error(err.response.data);
-    }
-  };
+    loadLatestBlogs();
+  }, []);
 
   const handleLikeBlog = async (id) => {
     await likeBlog(id, token, userId, setLatestBlogs);

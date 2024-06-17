@@ -121,3 +121,12 @@ export const createBlog = async (blogData, token) => {
         throw error.response.data;
     }
 };
+
+export const fetchLatestBlogs = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/blogs/latest`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
