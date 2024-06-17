@@ -21,11 +21,13 @@ function Register() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log("Registering user:", formData);
       const res = await registerUser(formData);
       localStorage.setItem("token", res.token);
       navigate("/");
     } catch (err) {
-      console.error(err);
+      console.error("Registration error:", err);
+      // Display error message to user
     }
   };
 
