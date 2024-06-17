@@ -10,3 +10,12 @@ export const forgotPassword = async (email) => {
     throw error.response.data;
   }
 };
+
+export const loginUser = async (formData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/login`, formData);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

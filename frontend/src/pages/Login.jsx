@@ -1,12 +1,12 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useContext } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthContext } from "../context/AuthContext";
+import { loginUser } from "../utils/userApi";
 
 function Login() {
   const [formData, setFormData] = useState({
@@ -24,14 +24,11 @@ function Login() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/users/login",
-        formData
-      );
-      login(res.data.token);
+      const res = await loginUser(formData);
+      login(res.token);
       navigate("/");
     } catch (err) {
-      toast.error(err.response.data.msg || "An error occurred.");
+      toast.error(err.msg || "An error occurred.");
     }
   };
 

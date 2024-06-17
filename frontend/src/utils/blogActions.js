@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 export const likeBlog = async (id, token, userId, setBlog) => {
     if (!token) {
         return; // Redirect to login if not logged in
@@ -13,7 +15,7 @@ export const likeBlog = async (id, token, userId, setBlog) => {
     };
 
     try {
-        await axios.put(`http://localhost:5000/api/blogs/like/${id}`, {}, config);
+        await axios.put(`${API_BASE_URL}/blogs/like/${id}`, {}, config);
         setBlog((prevBlog) => ({
             ...prevBlog,
             likes: [...prevBlog.likes, userId],
@@ -36,11 +38,7 @@ export const unlikeBlog = async (id, token, userId, setBlog) => {
     };
 
     try {
-        await axios.put(
-            `http://localhost:5000/api/blogs/unlike/${id}`,
-            {},
-            config
-        );
+        await axios.put(`${API_BASE_URL}/blogs/unlike/${id}`, {}, config);
         setBlog((prevBlog) => ({
             ...prevBlog,
             likes: prevBlog.likes.filter((like) => like !== userId),
