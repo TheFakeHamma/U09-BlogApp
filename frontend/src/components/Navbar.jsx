@@ -8,6 +8,10 @@ const Navbar = () => {
   const { isAuthenticated, logout } = useContext(AuthContext);
   const [isOpen, setIsOpen] = useState(false);
 
+  const handleLinkClick = () => {
+    setIsOpen(false);
+  };
+
   return (
     <nav className="bg-gray-800 p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -42,12 +46,14 @@ const Navbar = () => {
           >
             Blogs
           </NavLink>
-          <NavLink
-            to="/create-blog"
-            className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
-          >
-            Create Blog
-          </NavLink>
+          {isAuthenticated && (
+            <NavLink
+              to="/create-blog"
+              className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+            >
+              Create Blog
+            </NavLink>
+          )}
           {isAuthenticated ? (
             <>
               <NavLink
@@ -56,10 +62,7 @@ const Navbar = () => {
               >
                 Profile
               </NavLink>
-              <Button
-                onClick={logout}
-                className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
-              >
+              <Button onClick={logout} className="mx-2">
                 Logout
               </Button>
             </>
@@ -86,25 +89,33 @@ const Navbar = () => {
           <NavLink
             to="/blogs"
             className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+            onClick={handleLinkClick}
           >
             Blogs
           </NavLink>
-          <NavLink
-            to="/create-blog"
-            className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
-          >
-            Create Blog
-          </NavLink>
+          {isAuthenticated && (
+            <NavLink
+              to="/create-blog"
+              className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+              onClick={handleLinkClick}
+            >
+              Create Blog
+            </NavLink>
+          )}
           {isAuthenticated ? (
             <>
               <NavLink
                 to="/profile"
                 className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+                onClick={handleLinkClick}
               >
                 Profile
               </NavLink>
               <Button
-                onClick={logout}
+                onClick={() => {
+                  logout();
+                  setIsOpen(false);
+                }}
                 className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
               >
                 Logout
@@ -115,12 +126,14 @@ const Navbar = () => {
               <NavLink
                 to="/login"
                 className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+                onClick={handleLinkClick}
               >
                 Login
               </NavLink>
               <NavLink
                 to="/register"
                 className="block mt-4 lg:mt-0 text-white hover:text-gray-400"
+                onClick={handleLinkClick}
               >
                 Register
               </NavLink>
