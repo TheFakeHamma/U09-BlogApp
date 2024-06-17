@@ -30,17 +30,19 @@ const BlogCard = ({ blog, formatDate, userId, likeBlog, unlikeBlog }) => {
   const isLiked = blog.likes.includes(userId);
 
   return (
-    <div className="bg-white p-6 rounded shadow-md hover:shadow-lg transition-shadow duration-300 relative flex flex-col">
-      <div className="absolute top-4 right-4 text-sm text-gray-500 text-right">
-        <p>{blog.author.name}</p>
-        <p>{formatDate(blog.createdAt)}</p>
+    <div className="bg-white p-6 rounded shadow-md hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <h3 className="text-xl font-bold mb-2">{blog.title}</h3>
+          <p className="text-gray-700">{truncateText(blog.content, 150)}</p>
+        </div>
+        <div className="text-sm text-gray-500 text-right">
+          <p>{blog.author.name}</p>
+          <p>{formatDate(blog.createdAt)}</p>
+        </div>
       </div>
-      <h3 className="text-xl font-bold mb-2">{blog.title}</h3>
-      <p className="text-gray-700 mb-4 flex-grow">
-        {truncateText(blog.content, 150)}
-      </p>
-      <div className="absolute bottom-4 right-4 text-sm text-right">
-        <div className="flex items-center mb-2">
+      <div className="flex justify-between items-center mt-4">
+        <div className="flex items-center">
           <button
             onClick={() =>
               isLiked ? unlikeBlog(blog._id) : likeBlog(blog._id)
@@ -62,7 +64,7 @@ const BlogCard = ({ blog, formatDate, userId, likeBlog, unlikeBlog }) => {
         </div>
         <Pill text={blog.category} color={getPillColor(blog.category)} />
       </div>
-      <Link to={`/blogs/${blog._id}`} className="mt-auto">
+      <Link to={`/blogs/${blog._id}`} className="mt-4">
         <Button>Read More</Button>
       </Link>
     </div>
