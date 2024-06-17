@@ -1,9 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import { registerUser } from "../utils/userApi";
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -21,14 +21,11 @@ function Register() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/users/register",
-        formData
-      );
-      localStorage.setItem("token", res.data.token);
+      const res = await registerUser(formData);
+      localStorage.setItem("token", res.token);
       navigate("/");
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 

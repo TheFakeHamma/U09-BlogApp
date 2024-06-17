@@ -20,6 +20,15 @@ export const loginUser = async (formData) => {
   }
 };
 
+export const registerUser = async (formData) => {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/users/register`, formData);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
 export const fetchUserBlogs = async (token) => {
   const config = {
     headers: { "x-auth-token": token },
