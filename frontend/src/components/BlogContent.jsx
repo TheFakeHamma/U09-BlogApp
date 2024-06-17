@@ -10,12 +10,16 @@ const BlogContent = ({ blog, userId, formatDate, likeBlog, unlikeBlog }) => {
 
   return (
     <div className="bg-white p-6 rounded shadow-md hover:shadow-lg transition-shadow duration-300 relative">
-      <div className="absolute top-4 right-4 text-sm text-gray-500 text-right">
-        <p>{blog.author.name}</p>
-        <p>{formatDate(blog.createdAt)}</p>
+      <div className="flex flex-col sm:flex-row justify-between mb-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-2">{blog.title}</h1>
+          <p className="text-gray-700 mb-4">{blog.content}</p>
+        </div>
+        <div className="text-sm text-gray-500 text-right">
+          <p>{blog.author.name}</p>
+          <p>{formatDate(blog.createdAt)}</p>
+        </div>
       </div>
-      <h1 className="text-3xl font-bold mb-2">{blog.title}</h1>
-      <p className="text-gray-700 mb-4">{blog.content}</p>
       <div className="mb-4">
         <Pill text={blog.category} color="bg-blue-500" />
       </div>
