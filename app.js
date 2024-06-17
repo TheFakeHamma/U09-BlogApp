@@ -10,7 +10,9 @@ const app = express();
 connectDB();
 
 app.use(express.json({ extended: false }));
-app.use(cors());
+app.use(cors({
+    origin: process.env.FRONTEND_URL
+}));
 
 // Define routes
 app.use('/api/users', require('./routes/userRoutes'));
