@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState } from "react";
-import axios from "axios";
 import InputField from "../components/InputField";
 import Button from "../components/Button";
+import { forgotPassword } from "../utils/userApi";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -11,13 +11,10 @@ function ForgotPassword() {
   const onSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/users/forgot-password",
-        { email }
-      );
-      setMessage(res.data.msg);
+      const res = await forgotPassword(email);
+      setMessage(res.msg);
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
       setMessage("Error sending email");
     }
   };
