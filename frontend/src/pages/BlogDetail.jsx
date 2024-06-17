@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import jwtDecode from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import BlogContent from "../components/BlogContent";
 import CommentsSection from "../components/CommentsSection";
 import { likeBlog, unlikeBlog } from "../utils/blogActions";

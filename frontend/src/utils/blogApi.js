@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const getBlog = async (id) => {
     try {
@@ -91,6 +91,31 @@ export const searchBlogs = async (query, page) => {
 export const fetchBlogsByCategory = async (category) => {
     try {
         const response = await axios.get(`${API_BASE_URL}/blogs?category=${category}`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const fetchCategories = async () => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/blogs/categories`);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
+
+export const createBlog = async (blogData, token) => {
+    const config = {
+        headers: {
+            "Content-Type": "application/json",
+            "x-auth-token": token,
+        },
+    };
+
+    try {
+        const response = await axios.post(`${API_BASE_URL}/blogs`, blogData, config);
         return response.data;
     } catch (error) {
         throw error.response.data;

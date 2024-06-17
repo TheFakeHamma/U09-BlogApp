@@ -1,10 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import InputField from "../components/InputField";
 import TextArea from "../components/TextArea";
 import CategorySelect from "../components/CategorySelect";
 import Button from "../components/Button";
+import { fetchCategories, createBlog } from "../utils/blogApi";
 
 function CreateBlog() {
   const [formData, setFormData] = useState({
@@ -18,18 +18,16 @@ function CreateBlog() {
   const { title, content, selectedCategory, newCategory } = formData;
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const loadCategories = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/blogs/categories"
-        );
-        setCategories(res.data);
+        const data = await fetchCategories();
+        setCategories(data);
       } catch (err) {
-        console.error(err.response.data);
+        console.error(err);
       }
     };
 
-    fetchCategories();
+    loadCategories();
   }, []);
 
   const onSelectedCategoryChange = (e) =>
@@ -49,13 +47,6 @@ function CreateBlog() {
   const onSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
     const category = newCategory || selectedCategory;
 
     if (!category) {
@@ -64,11 +55,7 @@ function CreateBlog() {
     }
 
     try {
-      await axios.post(
-        "http://localhost:5000/api/blogs",
-        { ...formData, category },
-        config
-      );
+      await createBlog({ ...formData, category }, token);
       alert("Blog created successfully");
       setFormData({
         title: "",
@@ -77,7 +64,7 @@ function CreateBlog() {
         newCategory: "",
       }); // Reset form
     } catch (err) {
-      console.error(err.response.data);
+      console.error(err);
     }
   };
 
