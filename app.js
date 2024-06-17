@@ -6,6 +6,8 @@ const path = require('path');
 
 dotenv.config();
 
+console.log('Environment Variables:', process.env);
+
 const app = express();
 connectDB();
 
