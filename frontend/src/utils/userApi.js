@@ -19,3 +19,39 @@ export const loginUser = async (formData) => {
     throw error.response.data;
   }
 };
+
+export const fetchUserBlogs = async (token) => {
+  const config = {
+    headers: { "x-auth-token": token },
+  };
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/blogs`, config);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const fetchLikedBlogs = async (token) => {
+  const config = {
+    headers: { "x-auth-token": token },
+  };
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/liked-blogs`, config);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};
+
+export const fetchComments = async (token) => {
+  const config = {
+    headers: { "x-auth-token": token },
+  };
+  try {
+    const response = await axios.get(`${API_BASE_URL}/users/comments`, config);
+    return response.data;
+  } catch (error) {
+    throw error.response.data;
+  }
+};

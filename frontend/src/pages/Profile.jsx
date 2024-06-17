@@ -1,9 +1,14 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ProfileSection from "../components/ProfileSection";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
+import {
+  fetchUserBlogs,
+  fetchLikedBlogs,
+  fetchComments,
+} from "../utils/userApi";
+import { likeBlog, unlikeBlog } from "../utils/blogActions";
 
 function Profile() {
   const [userBlogs, setUserBlogs] = useState([]);
@@ -19,48 +24,22 @@ function Profile() {
       return;
     }
 
-    const fetchUserBlogs = async () => {
+    const loadData = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/users/blogs", {
-          headers: { "x-auth-token": token },
-        });
-        setUserBlogs(res.data);
+        const userBlogsData = await fetchUserBlogs(token);
+        setUserBlogs(userBlogsData);
+
+        const likedBlogsData = await fetchLikedBlogs(token);
+        setLikedBlogs(likedBlogsData);
+
+        const commentsData = await fetchComments(token);
+        setComments(commentsData);
       } catch (err) {
-        console.error(err.response.data);
+        console.error(err);
       }
     };
 
-    const fetchLikedBlogs = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/users/liked-blogs",
-          {
-            headers: { "x-auth-token": token },
-          }
-        );
-        setLikedBlogs(res.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
-    };
-
-    const fetchComments = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:5000/api/users/comments",
-          {
-            headers: { "x-auth-token": token },
-          }
-        );
-        setComments(res.data);
-      } catch (err) {
-        console.error(err.response.data);
-      }
-    };
-
-    fetchUserBlogs();
-    fetchLikedBlogs();
-    fetchComments();
+    loadData();
   }, [token, navigate]);
 
   const formatDate = (dateString) => {
@@ -74,72 +53,14 @@ function Profile() {
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  const likeBlog = async (id) => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(`http://localhost:5000/api/blogs/like/${id}`, {}, config);
-      setUserBlogs(
-        userBlogs.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
-        )
-      );
-      setLikedBlogs(
-        likedBlogs.map((blog) =>
-          blog._id === id ? { ...blog, likes: [...blog.likes, userId] } : blog
-        )
-      );
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleLikeBlog = async (id) => {
+    await likeBlog(id, token, userId, setUserBlogs);
+    await likeBlog(id, token, userId, setLikedBlogs);
   };
 
-  const unlikeBlog = async (id) => {
-    if (!token) {
-      navigate("/login");
-      return;
-    }
-
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-        "x-auth-token": token,
-      },
-    };
-
-    try {
-      await axios.put(
-        `http://localhost:5000/api/blogs/unlike/${id}`,
-        {},
-        config
-      );
-      setUserBlogs(
-        userBlogs.map((blog) =>
-          blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
-            : blog
-        )
-      );
-      setLikedBlogs(
-        likedBlogs.map((blog) =>
-          blog._id === id
-            ? { ...blog, likes: blog.likes.filter((like) => like !== userId) }
-            : blog
-        )
-      );
-    } catch (err) {
-      console.error(err.response.data);
-    }
+  const handleUnlikeBlog = async (id) => {
+    await unlikeBlog(id, token, userId, setUserBlogs);
+    await unlikeBlog(id, token, userId, setLikedBlogs);
   };
 
   return (
@@ -150,8 +71,8 @@ function Profile() {
         items={userBlogs}
         formatDate={formatDate}
         userId={userId}
-        likeBlog={likeBlog}
-        unlikeBlog={unlikeBlog}
+        likeBlog={handleLikeBlog}
+        unlikeBlog={handleUnlikeBlog}
         itemType="blog"
       />
       <ProfileSection
@@ -159,8 +80,8 @@ function Profile() {
         items={likedBlogs}
         formatDate={formatDate}
         userId={userId}
-        likeBlog={likeBlog}
-        unlikeBlog={unlikeBlog}
+        likeBlog={handleLikeBlog}
+        unlikeBlog={handleUnlikeBlog}
         itemType="blog"
       />
       <ProfileSection
