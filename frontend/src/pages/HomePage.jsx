@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import BlogSection from "../components/BlogSection";
 import { likeBlog, unlikeBlog } from "../utils/blogActions";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import { fetchLatestBlogs } from "../utils/blogApi";
 
 function HomePage() {
