@@ -22,7 +22,7 @@ function ResetPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex items-center justify-center min-h-screen bg-white px-4">
       <div className="w-full max-w-md">
         <form
           onSubmit={onSubmit}
@@ -39,7 +39,9 @@ function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <Button type="submit">Reset Password</Button>
+          <Button type="submit" className="w-full">
+            Reset Password
+          </Button>
           {message && <p className="mt-4 text-center">{message}</p>}
         </form>
       </div>

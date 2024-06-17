@@ -20,7 +20,7 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex items-center justify-center min-h-screen bg-white px-4">
       <div className="w-full max-w-md">
         <form
           onSubmit={onSubmit}
@@ -37,7 +37,9 @@ function ForgotPassword() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
-          <Button type="submit">Send Reset Link</Button>
+          <Button type="submit" className="w-full">
+            Send Reset Link
+          </Button>
           {message && <p className="mt-4 text-center">{message}</p>}
         </form>
       </div>

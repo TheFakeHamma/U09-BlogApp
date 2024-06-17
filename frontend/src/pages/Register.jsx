@@ -30,7 +30,7 @@ function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex items-center justify-center min-h-screen bg-white px-4">
       <div className="w-full max-w-md">
         <form
           onSubmit={onSubmit}
@@ -61,8 +61,10 @@ function Register() {
             onChange={onChange}
             required
           />
-          <div className="flex items-center justify-between">
-            <Button type="submit">Register</Button>
+          <div className="flex flex-col sm:flex-row items-center justify-between">
+            <Button type="submit" className="mb-4 sm:mb-0">
+              Register
+            </Button>
             <a
               href="/login"
               className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
